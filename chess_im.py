@@ -15,7 +15,7 @@ def get_concat_h(im1, im2):
 
 
 def gen_first_board(nb_pieces):
-    board_ = chess.Board('8/8/8/8/8/8/8/8 w - - 0 1')
+    board = chess.Board('8/8/8/8/8/8/8/8 w - - 0 1')
     cases_liste = ["a1", "a2", "a3", "a4", "a5", "a6", "a7", "a8", "b1", "b2", "b3", "b4", "b5", "b6", "b7", "b8", "c1",
                    "c2", "c3", "c4", "c5", "c6", "c7", "c8", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "e1", "e2",
                    "e3", "e4", "e5", "e6", "e7", "e8", "f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "g1", "g2", "g3",
@@ -25,59 +25,61 @@ def gen_first_board(nb_pieces):
     for j in range(nb_pieces):
         c = random.choice(cases_liste)
         p = random.choice(piece_liste)
-        board_.set_piece_at(square=chess.SQUARE_NAMES.index(c), piece=chess.Piece.from_symbol(p))
+        board.set_piece_at(square=chess.SQUARE_NAMES.index(c), piece=chess.Piece.from_symbol(p))
         cases_liste.remove(c)
 
-    board_svg = chess.svg.board(board_, coordinates=False)
+    board_svg = chess.svg.board(board, coordinates=False)
     svg2png(bytestring=board_svg,
-            write_to=f'positions/chessboard_{i}-0.png')
+            write_to=f'positions/chessboard_{i}_0.png')
 
-    im1 = Image.open(f'positions/chessboard_{i}-0.png')
+    im1 = Image.open(f'positions/chessboard_{i}_0.png')
     im1 = ImageOps.expand(im1, border=20, fill=0)
-    return board_
+    return board, im1
 
 
-def add_diff():
-    square = random.choice(chess.SQUARE_NAMES)
-    piece = random.choice(chess.PIECE_SYMBOLS[1:])
-    board_bis = board_
-    if board_.piece_at(square=chess.SQUARE_NAMES.index(square)) is not None:  # if there's a piece on the square
-        board_bis.remove_piece_at(square=chess.SQUARE_NAMES.index(square))
-    else:
-        board_bis.set_piece_at(square=chess.SQUARE_NAMES.index(square),
-                               piece=chess.Piece.from_symbol(piece))  # add a piece
-    return board_bis
+def add_differences(number_difference, board, numero_img):
+    no_remove = []
+    for j in range(number_difference):
+        square = random.choice(chess.SQUARE_NAMES)
+        piece = random.choice(chess.PIECE_SYMBOLS[1:])
+        print(square, piece)
+        while square in no_remove:
+            square = random.choice(chess.SQUARE_NAMES)
+        if board.piece_at(square=chess.SQUARE_NAMES.index(square)) is not None:
+            board.remove_piece_at(square=chess.SQUARE_NAMES.index(square))
+        else:
+            board.set_piece_at(square=chess.SQUARE_NAMES.index(square),
+                               piece=chess.Piece.from_symbol(piece))
+            no_remove.append(square)
+        print(no_remove)
+    board_svg = chess.svg.board(board, coordinates=False)
+    svg2png(bytestring=board_svg,
+            write_to=f'positions/chessboard_{numero_img}_{number_difference}.png')
+    im2 = Image.open(f'positions/chessboard_{numero_img}_{number_difference}.png')
+    im2 = ImageOps.expand(im2, border=20, fill=0)
+    get_concat_h(im_orig, im2).save(f'Chess_PNG/img_{numero_img}_{number_difference}.png')
 
 
 for i in range(76, 101):
-    L = []
-    list_diff = list(range(0, 7))
+    print(f"### Echiquier numéro {i}")
     # build and save the initial image
-    nb_pieces = random.randint(15, 20)  # J est le nombre de pieces sur l'image initiale de l'échequier
-    board_ = gen_first_board(nb_pieces)
+    nb_pieces = random.randint(3, 5)
+    board_1, im_orig = gen_first_board(nb_pieces)
+    board_2 = board_1.copy()
 
     # generate two nb of differences
-    L.append(random.choice(list_diff))
-    list_diff.remove(L[0])
-    L.append(random.choice(list_diff))
+    list_diff = list(range(0, 7))
+    L = random.sample(list_diff, 2)
+    print("L = ", L)
+    cpt = 1
 
     for nb_diff in L:
         if nb_diff == 0:
-            im1 = Image.open(f'positions/chessboard_{i}-0.png')
-            get_concat_h(im1, im1).save(f'Chess_PNG/img_{i}_{nb_diff}.png')
+            get_concat_h(im_orig, im_orig).save(f'Chess_PNG/img_{i}_0.png')
         else:
-            for diff in range(nb_diff):
-                new_board = add_diff()
-            new_board_svg = chess.svg.board(new_board, coordinates=False)
-            svg2png(bytestring=new_board_svg,
-                    write_to=f'positions/chessboard_{i}-{diff}.png')
-            get_concat_h(new_board_svg, new_board_svg).save()
+            if cpt == 1:
+                add_differences(nb_diff, board_1, i)
+            if cpt == 2:
+                add_differences(nb_diff, board_2, i)
+        cpt += 1
 
-
-            #new_board_svg = chess_differences.svg.board(new_board, coordinates=False)
-            #svg2png(bytestring=new_board_svg,
-                    #write_to=f'positions/chess14avril#{i}-{nb_diff}.png')
-            #im1 = Image.open(f'positions/chess14avril#{i}-0.png')
-            #im2 = Image.open(f'positions/chess14avril#{i}-{nb_diff}.png')
-            #get_concat_h(im1, im2).save(f'Chess_PNG/img_{i}_{nb_diff}.png')
-    print(f"### Echiquier numéro {i}")
