@@ -60,16 +60,20 @@ def add_differences(number_difference, board, numero_img):
     get_concat_h(im_orig, im2).save(f'Chess_PNG/img_{numero_img}_{number_difference}.png')
 
 
-for i in range(76, 101):
+for i in range(30, 40):
     print(f"### Echiquier numéro {i}")
     # build and save the initial image
-    nb_pieces = random.randint(3, 5)
+    nb_pieces = random.randint(15, 20)
     board_1, im_orig = gen_first_board(nb_pieces)
     board_2 = board_1.copy()
+    board_3 = board_1.copy()
+    board_4 = board_1.copy()
+    board_5 = board_1.copy()
+
 
     # generate two nb of differences
     list_diff = list(range(0, 7))
-    L = random.sample(list_diff, 2)
+    L = random.sample(list_diff, 5)
     print("L = ", L)
     cpt = 1
 
@@ -81,5 +85,12 @@ for i in range(76, 101):
                 add_differences(nb_diff, board_1, i)
             if cpt == 2:
                 add_differences(nb_diff, board_2, i)
+            if cpt == 3:
+                add_differences(nb_diff, board_3, i)
+            if cpt == 4:
+                add_differences(nb_diff, board_4, i)
+            if cpt == 5:
+                add_differences(nb_diff, board_5, i)
+
         cpt += 1
 
